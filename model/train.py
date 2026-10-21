@@ -1,23 +1,20 @@
-from os import PathLike
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
-from joblib import dump
 import pandas as pd
-import pathlib
+from xgboost import XGBRegressor
+from joblib import dump
 
-df = pd.read_csv(pathlib.Path('data/heart-disease.csv'))
-y = df.pop('target')
-X = df
-X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.2)
+# Leemos el dataset descargado genéricamente
+df = pd.read_csv('data/dataset.csv')
 
-print ('Training model.. ')
-clf = RandomForestClassifier(n_estimators = 10,
-                            max_depth=2,
-                            random_state=0)
-clf.fit(X_train, y_train)
-print ('Saving model..')
+# Usaremos estas 4 variables para predecir el GOLD
+features = ['NATURAL GAS', 'WTI CRUDE', 'COPPER', 'SILVER']
+df = df.dropna(subset=features + ['GOLD'])
 
-dump(clf, pathlib.Path('model/heart-disease-v1.joblib'))
+X = df[features]
+y = df['GOLD']
 
+print('Entrenando modelo XGBoost...')
+model = XGBRegressor(n_estimators=100, max_depth=3, random_state=42)
+model.fit(X, y)
 
+dump(model, 'model/commodity-v1.joblib')
+print('Modelo guardado.')

@@ -3,36 +3,22 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 
-# 1. Crear la aplicación que Render y Uvicorn están buscando
 app = FastAPI()
+modelo = joblib.load('model/commodity-v1.joblib')
 
-# 2. Cargar el modelo que fue generado por train.py
-modelo = joblib.load('model/heart-disease-v1.joblib')
-
-# 3. Definir la estructura exacta de datos basándonos en heart-disease.csv
-class Paciente(BaseModel):
-    age: float
-    sex: float
-    cp: float
-    trestbps: float
-    chol: float
-    fbs: float
-    restecg: float
-    thalach: float
-    exang: float
-    oldpeak: float
-    slope: float
-    ca: float
-    thal: float
+class CommodityData(BaseModel):
+    natural_gas: float
+    wti_crude: float
+    copper: float
+    silver: float
 
 @app.get("/")
 def inicio():
-    return {"mensaje": "API del modelo Heart Disease activa"}
+    return {"mensaje": "API de Commodities lista"}
 
 @app.post("/predict")
-def predecir(paciente: Paciente):
-    # Convertir los datos recibidos a un DataFrame de Pandas
-    datos = pd.DataFrame([paciente.dict()])
-    # Realizar la predicción con el modelo
-    prediccion = modelo.predict(datos)
-    return {"prediccion_target": int(prediccion[0])}
+def predecir(data: CommodityData):
+    df = pd.DataFrame([[data.natural_gas, data.wti_crude, data.copper, data.silver]],
+                      columns=['NATURAL GAS', 'WTI CRUDE', 'COPPER', 'SILVER'])
+    prediccion = modelo.predict(df)
+    return {"prediccion_gold": float(prediccion[0])}
