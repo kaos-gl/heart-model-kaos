@@ -1,9 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import pandas as pd
 
 app = FastAPI()
+
+# Esto le da permiso a tu Frontend de conectarse
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 modelo = joblib.load('model/commodity-v1.joblib')
 
 class CommodityData(BaseModel):
