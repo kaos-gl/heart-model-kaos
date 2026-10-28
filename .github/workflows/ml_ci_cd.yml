@@ -35,3 +35,25 @@ jobs:
         
       - name: docker push
         run: docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.event.client_payload.sha }}
+
+      - name: render deploy
+        if: github.event_name == 'repository_dispatch'
+        env:
+          TAG: ${{ github.event.client_payload.sha }}
+          IMAGE: kaosgl/model-heart-kaos
+          HOOK_V25: ${{ secrets.HOOK_V25 }}
+          HOOK_V50: ${{ secrets.HOOK_V50 }}
+          HOOK_V100: ${{ secrets.HOOK_V100 }}
+        run: |
+          # Asignamos el Hook correcto dependiendo de la versión
+          if [ "$TAG" == "v25" ]; then HOOK=$HOOK_V25; fi
+          if [ "$TAG" == "v50" ]; then HOOK=$HOOK_V50; fi
+          if [ "$TAG" == "v100" ]; then HOOK=$HOOK_V100; fi
+
+          if [ -z "$HOOK" ]; then
+            echo "Sin RENDER_DEPLOY_HOOK_URL: se omite el despliegue en Render"
+            exit 0
+          fi
+          
+          echo "Disparando actualización en Render para la versión $TAG..."
+          curl -fsS -G "$HOOK" --data-urlencode "imgURL=docker.io/$IMAGE:$TAG"
