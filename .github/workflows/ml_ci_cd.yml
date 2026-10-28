@@ -46,9 +46,9 @@ jobs:
           HOOK_V100: ${{ secrets.HOOK_V100 }}
         run: |
           # Asignamos el Hook correcto dependiendo de la versión
-          if [ "$TAG" == "v25" ]; then HOOK=$HOOK_V25; fi
-          if [ "$TAG" == "v50" ]; then HOOK=$HOOK_V50; fi
-          if [ "$TAG" == "v100" ]; then HOOK=$HOOK_V100; fi
+          if [ "$TAG" == "version-25-pct" ]; then HOOK=$HOOK_V25; fi
+          if [ "$TAG" == "version-50-pct" ]; then HOOK=$HOOK_V50; fi
+          if [ "$TAG" == "version-100-pct" ]; then HOOK=$HOOK_V100; fi
 
           if [ -z "$HOOK" ]; then
             echo "Sin RENDER_DEPLOY_HOOK_URL: se omite el despliegue en Render"
